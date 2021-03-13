@@ -1,7 +1,7 @@
 import Categories from './Categories';
 import { buildTree, getIdsFromNodes } from '../../utils';
 import response from './response';
-import { useReducer } from 'react';
+import { useReducer, useMemo, useCallback } from 'react';
 
 const ROOT_PARENT_ID = "0";
 
@@ -31,7 +31,7 @@ function reducer(state, action) {
                     ],
                 };
             }
-        default: 
+        default:
             return state;
     }
 }
@@ -39,18 +39,24 @@ function reducer(state, action) {
 const CategoriesRoot = () => {
     const initialState = { checked: [], categories: response.data.categories };
     const [state, dispatch] = useReducer(reducer, initialState);
+    const tree = useMemo(() => {
+        return buildTree(state.categories, ROOT_PARENT_ID, state.checked)
+    }, [state.categories, state.checked]);
+
+    const onChange = useCallback((checked, node) => {
+        dispatch({
+            type: "tree-change",
+            payload: {
+                node,
+                checked
+            }
+        });
+    }, []);
+
     return (
         <Categories
-            categories={buildTree(state.categories, ROOT_PARENT_ID, state.checked)}
-            onChange={(checked, node) => {
-                dispatch({
-                    type: "tree-change",
-                    payload: {
-                        node,
-                        checked
-                    }
-                });
-            }}
+            categories={tree}
+            onChange={onChange}
         ></Categories>
     );
 };

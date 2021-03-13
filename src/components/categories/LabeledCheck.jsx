@@ -1,11 +1,17 @@
 import classNames from 'classnames';
-import { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import PropTypes from 'prop-types';
 import SubCategories from './Categories';
 
 const LabeledCheck = ({ onChange, node }) => {
     const [isCollapsed, setIsCollapsed] = useState(true);
     const isLeafNode = !node.children.length;
+    const onClickNode = useCallback(() => {
+        setIsCollapsed((isCollapsedCurrent) => !isCollapsedCurrent);
+    }, []);
+    const onCheck = useCallback(() => {
+        onChange(node.checked, node);
+    }, [node, onChange]);
     return (
         <li
             className={classNames("labeled-check", { "collapsed": isCollapsed && !isLeafNode, "expanded": !isCollapsed && !isLeafNode })}
@@ -23,10 +29,10 @@ const LabeledCheck = ({ onChange, node }) => {
                 id="check"
                 name="check"
                 checked={node.checked}
-                onChange={() => onChange(node.checked, node)}
+                onChange={onCheck}
                 className={classNames("check-input", { "collapsed": isCollapsed })}
             />
-            <label onClick={() => { setIsCollapsed(!isCollapsed) }}>{node.name}</label>
+            <label onClick={onClickNode}>{node.name}</label>
             {
                 (!isLeafNode && !isCollapsed) ?
                     <ul >
